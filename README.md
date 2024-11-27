@@ -1,1 +1,1 @@
-# Welcome to your Lovable Project!
+# Welcome to my POS WEB Project!
