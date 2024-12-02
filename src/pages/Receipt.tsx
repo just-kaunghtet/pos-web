@@ -1,14 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Printer, ArrowLeft } from "lucide-react";
-import { Link, useParams, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const Receipt = () => {
-  const { username } = useParams();
   const location = useLocation();
   const scannedItems = location.state?.scannedItems || [];
-  const total = scannedItems.reduce((sum, item) => sum + item.price * item.count, 0);
+  const total = scannedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const saveReceiptToSupabase = async () => {
     try {
@@ -44,8 +45,8 @@ const Receipt = () => {
         return;
       }
 
-      const newSaleCount = (saleData.sale_count || 0) + item.count;
-      const newInventoryCount = (inventoryData.count || 0) - item.count;
+      const newSaleCount = (saleData.sale_count || 0) + item.quantity;
+      const newInventoryCount = (inventoryData.count || 0) - item.quantity;
 
       const [updateSaleError, updateInventoryError] = await Promise.all([
         supabase.from('sales').update({ sale_count: newSaleCount }).eq('item_id', item.id),
@@ -62,65 +63,17 @@ const Receipt = () => {
     }
   };
 
-  const printReceipt = async (size) => {
-    const fontSize = size === "small" ? "10px" : "15px";
-    const documentWidth = size === "small" ? "300px" : "800px";
+  const printReceipt = async () => {
+    const receiptElement = document.getElementById('receipt'); // Get the receipt element
 
-    try {
-      await saveReceiptToSupabase();
-
-      const printWindow = window.open("", "", "width=800,height=600");
-      if (!printWindow) {
-        console.error("Failed to open print window.");
-        return;
-      }
-
-      const receiptHTML = `
-        <html>
-          <head>
-            <title>Receipt</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 20px; font-size: ${fontSize}; width: ${documentWidth}; }
-              .receipt-header { text-align: center; margin-bottom: 20px; }
-              .receipt-header h2 { margin: 0; }
-              .receipt-details { width: 100%; border-collapse: collapse; }
-              .receipt-details th, .receipt-details td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-              .receipt-details th { background-color: #f2f2f2; }
-              .total { font-weight: bold; }
-            </style>
-          </head>
-          <body>
-            <div class="receipt-header"><h2>POS Store</h2></div>
-            <table class="receipt-details">
-              <thead>
-                <tr><th>Item Name</th><th>Item Count</th><th>Unit Price</th><th>Total</th></tr>
-              </thead>
-              <tbody>
-                ${scannedItems
-                  .map(
-                    (item) => `
-                  <tr>
-                    <td>${item.name}</td>
-                    <td>${item.count}</td>
-                    <td>${item.price} kyats</td>
-                    <td>${item.price * item.count} kyats</td>
-                  </tr>`
-                  )
-                  .join("")}
-                <tr class="total">
-                  <td colspan="3" style="text-align: right;">Total:</td>
-                  <td>${total} kyats</td>
-                </tr>
-              </tbody>
-            </table>
-          </body>
-        </html>`;
-
-      printWindow.document.write(receiptHTML);
-      printWindow.document.close();
-      printWindow.print();
-    } catch (error) {
-      console.error("Error printing receipt:", error);
+    if (receiptElement) {
+      const canvas = await html2canvas(receiptElement); // Capture the receipt as canvas
+      const imgData = canvas.toDataURL('image/png'); // Convert canvas to image data
+      const pdf = new jsPDF(); // Create a new jsPDF instance
+      pdf.addImage(imgData, 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
+      pdf.save('receipt.pdf'); // Save the PDF
+    } else {
+      console.error("Receipt element not found.");
     }
   };
 
@@ -128,7 +81,7 @@ const Receipt = () => {
     <div className="min-h-screen bg-pos-background p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center mb-8">
-          <Link to={`/home/${username}`}>
+          <Link to={'/home/'}>
             <Button variant="ghost" className="mr-4">
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -136,7 +89,7 @@ const Receipt = () => {
           <h1 className="text-3xl font-bold text-pos-text">Receipt</h1>
         </div>
 
-        <Card className="p-6 text-center">
+        <Card className="p-6 max-w-xl text-center" id="receipt">
           <h2 className="text-2xl font-bold text-pos-text mb-8">POS Store</h2>
           <div className="text-left">
             <h1 className="text-xl font-semibold mb-4">Receipt Details</h1>
@@ -151,9 +104,9 @@ const Receipt = () => {
                 {scannedItems.map((item) => (
                   <li key={item.id} className="grid grid-cols-4 border-b pb-2">
                     <span>{item.name}</span>
-                    <span className="text-center">{item.count}</span>
+                    <span className="text-center">{item.quantity}</span>
                     <span className="text-center">{item.price} kyats</span>
-                    <span className="text-center">{item.price * item.count} kyats</span>
+                    <span className="text-center">{item.price * item.quantity} kyats</span>
                   </li>
                 ))}
                 <li className="grid grid-cols-4 mt-4 font-bold text-pos-text">
@@ -167,13 +120,9 @@ const Receipt = () => {
           </div>
 
           <div className="flex space-x-4 mt-8">
-            <Button className="flex-1 h-16" size="lg" onClick={() => printReceipt("small")}>
+            <Button className="flex-1 h-16" size="lg" onClick={() => { printReceipt(); saveReceiptToSupabase(); }}>
               <Printer className="mr-2 h-6 w-6" />
-              Small
-            </Button>
-            <Button className="flex-1 h-16" size="lg" onClick={() => printReceipt("large")}>
-              <Printer className="mr-2 h-6 w-6" />
-              Large
+              Print Receipt
             </Button>
           </div>
         </Card>

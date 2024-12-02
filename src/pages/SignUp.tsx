@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from '@/integrations/supabase/client';
-
+import bcrypt from 'bcryptjs';
 const SignUp = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -29,7 +29,11 @@ const SignUp = () => {
             alert("Passwords do not match");
             return;
         }
-        const { data,error } = await supabase
+
+        // Hash the password before storing
+        const hashedPassword = await bcrypt.hash(formData.password, 10); // Hashing the password
+
+        const { data, error } = await supabase
             .from('users')
             .insert([
                 {
@@ -37,7 +41,7 @@ const SignUp = () => {
                     last_name: formData.lastName,
                     username: formData.username,
                     email: formData.email,
-                    password_hash: formData.password // Consider hashing the password before storing
+                    password_hash: hashedPassword // Store the hashed password
                 }
             ]);
 
@@ -45,7 +49,7 @@ const SignUp = () => {
             console.error('Error inserting data:', error);
             alert('Error signing up. Please try again.');
         } else {
-            console.log('User signed up successfully');
+            alert('User signed up successfully');
             navigate('/');
         }
     };
@@ -55,8 +59,8 @@ const SignUp = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-violet-300">
-            <div className="bg-white p-8 rounded shadow-md w-full max-w-sm">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pos-background to-pos-surface">
+            <div className="bg-white p-8 rounded shadow-lg w-full max-w-sm">
                 <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">

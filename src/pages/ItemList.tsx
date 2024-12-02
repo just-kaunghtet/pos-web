@@ -38,7 +38,7 @@ const ItemList = () => {
     <div className="min-h-screen bg-pos-background p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center mb-8">
-          <Link to={`/home/${username}`}>
+          <Link to={`/home/`}>
             <Button variant="ghost" className="mr-4">
               <ArrowLeft className="w-5 h-5" />
             </Button>

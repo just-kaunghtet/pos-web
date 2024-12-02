@@ -3,6 +3,8 @@ import { useNavigate,useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from '@/integrations/supabase/client';
+import bcrypt from 'bcryptjs';
+
 interface user {
   username: string;
 }
@@ -17,12 +19,18 @@ const Login = () => {
     .select('id, password_hash')
     .eq('username', userName)
     .single();
-    const isUserValid = data !== null;
-    const isPasswordValid = password === data.password_hash;
-    if (isUserValid && isPasswordValid) {
-      navigate(`/home/${user.username}`);
+
+    if (error || !data) {
+        alert('Invalid username or password');
+        return;
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, data.password_hash);
+
+    if (isPasswordValid) {
+        navigate(`/home/${user.username}`);
     } else {
-      alert('Invalid username or password');
+        alert('Invalid username or password');
     }
   };
 
@@ -31,7 +39,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-violet-200">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pos-background to-pos-surface">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-sm">
         <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
         <div className="mb-4">

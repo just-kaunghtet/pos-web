@@ -21,38 +21,38 @@ const Index = () => {
         <h1 className="text-4xl font-bold text-pos-text mb-2">Welcome to</h1>
         <h2 className="text-5xl font-bold text-pos-text mb-12">POS System</h2>
         <div className="grid grid-cols-2 gap-6">
-          <Link to={`/manage-items/${username}`}>
-            <Card className="p-6 hover:shadow-xl hover:bg-pos-hover transition-all duration-300">
+          <Link to={`/manage-items/`}>
+            <Card className="p-6 hover:shadow-xl hover:bg-pos-hover transition-all duration-300 text-pos-text hover:text-pos-surface hover:bg-pos-text">
               <div className="flex flex-col items-center space-y-4">
-                <Settings className="w-12 h-12 text-pos-text" />
-                <h3 className="text-xl font-semibold text-pos-text">Manage Items</h3>
+                <Settings className="w-12 h-12 " />
+                <h3 className="text-xl font-semibold ">Manage Items</h3>
               </div>
             </Card>
           </Link>
           
-          <Link to={`/scanner/${username}`}>
-            <Card className="p-6 hover:shadow-xl hover:bg-pos-hover transition-all duration-300 bg-pos-text">
+          <Link to={`/new-sale/`}>
+            <Card className="p-6 hover:shadow-xl hover:bg-pos-hover transition-all duration-300 text-pos-text hover:text-pos-surface hover:bg-pos-text">
               <div className="flex flex-col items-center space-y-4">
-                <ShoppingCart className="w-12 h-12 text-white" />
-                <h3 className="text-xl font-semibold text-white">New Sale</h3>
+                <ShoppingCart className="w-12 h-12" />
+                <h3 className="text-xl font-semibold">New Sale</h3>
               </div>
             </Card>
           </Link>
           
-          <Link to="/monthly-report">
-            <Card className="p-6 hover:shadow-xl hover:bg-pos-hover transition-all duration-300">
+          <Link to={`/monthly-report/`}>
+            <Card className="p-6 hover:shadow-xl hover:bg-pos-hover transition-all duration-300 text-pos-text hover:text-pos-surface hover:bg-pos-text">
               <div className="flex flex-col items-center space-y-4">
-                <BarChart2 className="w-12 h-12 text-pos-text" />
-                <h3 className="text-xl font-semibold text-pos-text">Monthly Report</h3>
+                <BarChart2 className="w-12 h-12" />
+                <h3 className="text-xl font-semibold">Monthly Report</h3>
               </div>
             </Card>
           </Link>
           
           <Link to="/admin-login">
-            <Card className="p-6 hover:shadow-xl hover:bg-pos-hover transition-all duration-300">
+            <Card className="p-6 hover:shadow-xl hover:bg-pos-hover transition-all duration-300 text-pos-text hover:text-pos-surface hover:bg-pos-text">
               <div className="flex flex-col items-center space-y-4">
-                <User className="w-12 h-12 text-pos-text" />
-                <h3 className="text-xl font-semibold text-pos-text">Admin Login</h3>
+                <User className="w-12 h-12" />
+                <h3 className="text-xl font-semibold">Admin Login</h3>
               </div>
             </Card>
           </Link>
