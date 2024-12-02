@@ -28,7 +28,7 @@ const Login = () => {
     const isPasswordValid = await bcrypt.compare(password, data.password_hash);
 
     if (isPasswordValid) {
-        navigate(`/home/${user.username}`);
+        navigate('/home/');
     } else {
         alert('Invalid username or password');
     }
